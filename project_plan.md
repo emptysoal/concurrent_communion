@@ -53,7 +53,7 @@
   - 反馈： 服务端发送 "OK"  其他的为失败   
   - 聊天：     “C ” + name + content    
   - 发文件： “F ” + name + file_path    
-  - 下文件：   “L ” + name + file_name    
+  - 下文件： “L ” + name + file_name    
   - 游戏邀请：  “G " + name    
   - 接受邀请：  ”D " + name + 发起者name    
   - 退出：     “E ” + name
