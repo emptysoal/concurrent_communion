@@ -47,16 +47,15 @@
 
 
 - 协议设计：   
-  - 进入聊天：       
-    - 用户名：“U ” + name      
-    - 密码:  “P " + name + password  
+  - 进入聊天(登录)：“E ” + name + password
+  - 注册：“R ”+ name + password
   - 反馈： 服务端发送 "OK"  其他的为失败   
   - 聊天：     “C ” + name + content    
   - 发文件： “F ” + name + file_path    
   - 下文件： “L ” + name + file_name    
   - 游戏邀请：  “G " + name    
   - 接受邀请：  ”D " + name + 发起者name    
-  - 退出：     “E ” + name
+  - 退出：     “Q ” + name
 
 ## 逐个功能分析，列出逻辑流程
 
@@ -70,16 +69,16 @@
 - 库名：chat_room
 - 主表：    
   - 表名：  base_info    
-  - 字段名：id   name   password    address    register_time(default now())
+  - 字段名：id   name   password    register_time(default now())
 - 聊天记录表：    
   - 表名：  chat_history    
-  - 字段名：id   comment     send_time(default now())    level    uid(foreign key)
+  - 字段名：id   name   content     send_time(default now())
 - 文件传输记录表：    
   - 表名：  file_put_record    
-  - 字段名：id   file_name   send_time(default now())    level    uid(foreign key)    file_comment
+  - 字段名：id   name  file_name   send_time(default now())   file_content
 - 游戏対弈记录表：    
   - 表名：  game_record    
-  - 字段名：id   result      start_time(default now())   level    uid(foreign key)
+  - 字段名：id   name  result      start_time(default now())
 
 ### 网络通信搭建
 
