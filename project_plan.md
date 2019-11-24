@@ -42,42 +42,48 @@
 
 
 
-封装方法：全部采用类封装，包括启动程序，除导入模块，不允许有在类外部的语句
+封装方法：全部采用类封装，启动程序采用函数封装
 
 
 
-- 协议设计：   
+- 服务器-客户端  协议设计：   
   - 进入聊天(登录)：“E ” + name + password
   - 注册：“R ”+ name + password
   - 反馈： 服务端发送 "OK"  其他的为失败   
   - 聊天：     “C ” + name + content    
   - 发文件： “F ” + name + file_path    
-  - 下文件： “L ” + name + file_name    
+  - 反馈：“ALLOW”表示允许上传
+  - 下文件： “L ” + name + file_name
+  - 反馈：“AGREE”表示允许下载
   - 游戏邀请：  “G " + name    
   - 接受邀请：  ”D " + name + 发起者name    
   - 退出：     “Q ” + name
+- 服务器-缓存队列  协议设计
+  - 录入基本信息：“BASE”+ name + password
+  - 录入聊天记录：“CHAT”+ name + content
+  - 录入文件上传记录：“FILE”+ name + file_name
 
 ## 逐个功能分析，列出逻辑流程
 
 ### 构建队列类
 
 - 作为数据库存放前的缓存区
-- 分别构建“基本信息队列”、“聊天记录队列”、“文件传输队列”、“対弈记录队列” 这4个队列实例对象各项数据先存放到对应队列实例中，再由队列存放至数据库中
+- 缓存区根据协议，将信息记录分别存到对应的数据库
 
 ### 构建数据库
 
 - 库名：chat_room
-- 主表：    
-  - 表名：  base_info    
+- 主表：
+  - 表名：  base_info
   - 字段名：id   name   password    register_time(default now())
-- 聊天记录表：    
-  - 表名：  chat_history    
+- 聊天记录表：
+  - 表名：  chat_history
   - 字段名：id   name   content     send_time(default now())
-- 文件传输记录表：    
-  - 表名：  file_put_record    
-  - 字段名：id   name  file_name   send_time(default now())   file_content
-- 游戏対弈记录表：    
-  - 表名：  game_record    
+- 文件传输记录表：
+  - 表名：  file_put_record
+  - 字段名：id   name  file_name   send_time(default now())
+- 游戏対弈记录表：
+  - 表名：  game_record
   - 字段名：id   name  result      start_time(default now())
 
 ### 网络通信搭建
@@ -119,6 +125,7 @@
 - 服务端：
   - 接受请求(请求类型区分)           
   - 发送给其他人
+  - 同时将记录更新至数据库中
 
 ### 发送文件
 

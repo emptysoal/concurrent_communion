@@ -33,8 +33,8 @@ class DataManager:
         :param passwd: 注册的密码
         :return: False则未注册成功；True则注册成功，并将信息写入数据库
         """
-        if not self.__judge_user(user):  # 用户名不可用
-            return False
+        # if not self.__judge_user(user):  # 用户名不可用
+        #     return False
         sql = "insert into base_info(name,password) values(%s,%s);"
         try:
             self.__cur.execute(sql, [user, passwd])
@@ -46,7 +46,7 @@ class DataManager:
         else:
             return True
 
-    def __judge_user(self, user):
+    def judge_user(self, user):
         """
             判断用户名是否重复，是返回False(注册的用户名不可用)，否返回True(注册的用户名可用)
         :param user: 注册的用户名
@@ -66,6 +66,30 @@ class DataManager:
         sql = "select name,password from base_info where name=%s and password=%s;"
         self.__cur.execute(sql, [user, passwd])
         return self.__cur.fetchone()
+
+    def update_chat(self, name, content):
+        """
+            将用户名和相应聊天内容更新到数据表chat_history中
+        :param name: 发消息者的用户名
+        :param content: 所发送的消息内容
+        """
+        pass
+
+    def is_file_exist(self, file_name):
+        """
+            判断传入的文件名是否已经存在
+        :param file_name: 外界传入的文件名称
+        :return: True表示已经存在,False表示不存在
+        """
+        pass
+
+    def update_file_put(self, name, file_name):
+        """
+            将用户名和文件名称更新到数据表file_put_record
+        :param name: 上传文件者的用户名
+        :param file_name: 上传文件的文件名称
+        """
+        pass
 
 
 if __name__ == '__main__':
