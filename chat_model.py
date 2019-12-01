@@ -73,7 +73,15 @@ class DataManager:
         :param name: 发消息者的用户名
         :param content: 所发送的消息内容
         """
-        pass
+        sql = "insert into chat_history(name,content) values(%s,%s);"
+        try:
+            self.__cur.execute(sql, [name, content])
+            self.__db.commit()
+        except Exception as e:
+            self.__db.rollback()
+            return False
+        else:
+            return True
 
     def is_file_exist(self, file_name):
         """
@@ -81,7 +89,9 @@ class DataManager:
         :param file_name: 外界传入的文件名称
         :return: True表示已经存在,False表示不存在
         """
-        pass
+        sql = "select file_name from file_put_record where file_name='%s';" % file_name
+        self.__cur.execute(sql)
+        return self.__cur.fetchone() is not None
 
     def update_file_put(self, name, file_name):
         """
@@ -89,9 +99,26 @@ class DataManager:
         :param name: 上传文件者的用户名
         :param file_name: 上传文件的文件名称
         """
+        sql = "insert into file_put_record(name,file_name) values(%s,%s);"
+        try:
+            self.__cur.execute(sql, [name, file_name])
+            self.__db.commit()
+        except Exception as e:
+            self.__db.rollback()
+            return False
+        else:
+            return True
+
+    def update_game_info(self, name, result):
+        """
+            将用户名和游戏结果更新到数据表game_record
+        :param name: 游戏者的用户名
+        :param result: 游戏结果
+        """
         pass
 
 
 if __name__ == '__main__':
     data_manager = DataManager("localhost", 3306, "root", "123456", "concurrent_communion", "utf8")
     data_manager.create_cur()
+    print(data_manager.is_file_exist("test.txt"))
