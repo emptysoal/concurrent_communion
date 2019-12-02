@@ -20,7 +20,8 @@ class ChatClient:
         self.list_msgs = ["", "", "", "", "", "", "", ""]  # 信息存储列表
         self.__lock = Lock()  # 创建锁对象
         self.map = self.__init_map()  # 游戏map初始化
-        self.was_in_game = True  # 是否在游戏中的标志，False不在，True在
+        self.was_in_game = False  # 是否在游戏中的标志，False不在，True在
+        self.allow_join = False   # 是否允许加入游戏标志，False不允许，True允许
 
     def connect_server(self):
         """
@@ -88,15 +89,12 @@ class ChatClient:
             elif data == b"$$There is no file what you want...$$":
                 tkinter.messagebox.showerror(title="File Put Error", message=data.decode().strip("$$"))
             elif data == b"You are allowed":
-                self.was_in_game = False
-            elif data == b"You was in a game, can not request another":
-                tkinter.messagebox.showerror(title="Game Request Error", message=data.decode())
+                self.was_in_game = True
             elif data == b"you can join the game":
-                self.was_in_game = False
-            elif data == b"You was in a game, can not accept another":
-                tkinter.messagebox.showerror(title="Game Accept Error", message=data.decode())
+                self.was_in_game = True
+                self.allow_join = True
             elif data == b"The game has already been joined":
-                tkinter.messagebox.showerror(title="Game Accept Failed", message=data.decode())
+                self.allow_join = False
             elif data == b"##EXIT##":
                 return
             else:

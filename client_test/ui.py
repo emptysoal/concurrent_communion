@@ -203,37 +203,35 @@ class ClientUI:
 
     # 游戏邀请按钮关联函数
     def __game_request(self):
-        # 游戏请求发送
-        self.__client.game_request()
-        sleep(2)
-        if self.__client.was_in_game == True:
-            return
-        # 游戏标记变更
-        self.__mark = 1  # 表明此时为发起者
-        # 棋盘外框架设置
-        self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)
+        if self.__client.was_in_game == True:  # 先判断自己是否已处于一个游戏
+            tkinter.messagebox.showerror(title="Request Error", message="You are in a game now")
+            return  # 已在游戏中则中止后续处理
+        self.__client.game_request()  # 游戏请求发送
+        self.__mark = 1  # 游戏标记变更(表明此时为发起者)
+        self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)  # 棋盘外框架设置
         self.__game_window.title("game view")
         self.__game_window.resizable(width=False, height=False)
-        # 生成棋盘视图
-        self.__canvas_set()
+        self.__canvas_set()  # 生成棋盘视图
 
+    # 游戏接受按钮关联函数
     def __game_accept(self, entry_obj, entry_info):
-        # 游戏接受请求
-        if not entry_obj.get():
+        if self.__client.was_in_game == True:  # 先判断自己是否已处于一个游戏
+            tkinter.messagebox.showerror(title="Accept Error", message="You are in a game now")
+            return  # 已在游戏中则中止后续处理
+        if not entry_obj.get():  # 判断对手名称处输入是否为空
+            tkinter.messagebox.showerror(title="Adversary Error", message="Adversary is empty")
             return
-        self.__client.game_accept(entry_obj.get())
+        self.__client.game_accept(entry_obj.get())  # 游戏接受请求发送
         entry_info.set("")
-        sleep(2)
-        if self.__client.was_in_game == True:
+        sleep(1)
+        if self.__client.allow_join == False:
+            tkinter.messagebox.showerror(title="Accept Error", message="The game has already been joined")
             return
-        # 游戏标记变更
-        self.__mark = 2  # 表明此时为接受者
-        # 棋盘外框架设置
-        self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)
+        self.__mark = 2  # 游戏标记变更(表明此时为接受者)
+        self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)  # 棋盘外框架设置
         self.__game_window.title("game view")
         self.__game_window.resizable(width=False, height=False)
-        # 生成棋盘视图
-        self.__canvas_set()
+        self.__canvas_set()  # 生成棋盘视图
 
     def __canvas_set(self):  # 基础布局设置
         canvas = tk.Canvas(self.__game_window, bg="#bbb", width=340, height=360)  # 背景

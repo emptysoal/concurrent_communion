@@ -157,27 +157,12 @@ class ChatServer:
             response = "$$There is no file what you want...$$"
         connfd.send(response.encode())
 
-    def __is_in_game(self, name):
-        """
-            判断游戏发起者或接受者是否正处于一个游戏中
-        :param name: 游戏发起者或接受者用户名
-        :return: True表示在游戏中，False表示不在游戏中
-        """
-        for item in self.__dict_game_info:
-            if item == name:
-                return True
-        else:
-            return False
-
     def __game_request(self, connfd, name):
         """
             游戏邀请请求处理
         :param connfd: 对应处理游戏邀请者的相关信息的套接字
         :param name: 游戏邀请者用户名
         """
-        if self.__is_in_game(name):
-            connfd.send(b"You was in a game, can not request another")
-            return
         connfd.send(b"You are allowed")
         self.__dict_game_info[name] = [connfd]  # 对局字典中添加发起者信息，值为列表，列表长度为一时，为等待状态
         for client in self.__rlist:
@@ -191,17 +176,16 @@ class ChatServer:
         :param name: 游戏接受者用户名
         :param adversary_name: 对手用户名，即发邀请者用户名
         """
-        if self.__is_in_game(name):
-            connfd.send(b"You was in a game, can not accept another")
-            return
-        # 判断要接受的游戏是否处于等待状态，分别作出处理
         if len(self.__dict_game_info[adversary_name]) == 1:  # 发起者为等待状态
             self.__dict_game_info[name] = [connfd, (self.__dict_game_info[adversary_name])[0]]  # 字典添加接受者信息
             (self.__dict_game_info[adversary_name]).append(connfd)  # 发起者为键的字典元素中，添加接受者的connfd
             response = "you can join the game"
+            for client in self.__rlist:  # 群发其他人已接受游戏邀请
+                if client is not self.__sockfd and client is not connfd:
+                    client.send(("'%s'接受了'%s'的游戏邀请" % (name, adversary_name)).encode())  # 群发游戏邀请通知
         else:
             response = "The game has already been joined"
-        connfd.send(response.encode())
+        connfd.send(response.encode())  # 回复游戏接受者
 
     def __game_step(self, name, step):
         """
