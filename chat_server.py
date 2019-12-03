@@ -18,12 +18,13 @@ class ChatServer:
         self.__addr = (host, port)
         self.__sockfd = self.__create_socket()
         self.__rlist = [self.__sockfd]  # 监控读事件IO，此时里面放入了监听套接字
-        self.__wlist = []  # 监控写事件IO
-        self.__xlist = []  # 监控错误事件IO
+        self.__wlist = []               # 监控写事件IO
+        self.__xlist = []               # 监控错误事件IO
         self.__data_manager = chat_model.DataManager("localhost", 3306, "root", "123456",
                                                      "concurrent_communion", "utf8")
-        self.__buffer = Queue(10)  # 信息存储缓存队列
-        self.__dict_game_info = {}  # 用于存放游戏对局双方用户名和connfd，键为发起者，值为接受者
+        self.__buffer = Queue(10)       # 信息存储缓存队列
+        self.__dict_game_info = {}      # 用于存放游戏对局双方connfd，键为游戏一方用户名，
+                                        # 值为列表，列表中分别为对应用户名的connfd和对手的connfd
 
     def __create_socket(self):
         """
@@ -129,7 +130,7 @@ class ChatServer:
         if self.__data_manager.is_file_exist(file_name):  # 如果文件已经存在
             response = "$$The file is already exist , please change one$$"
         else:  # 如果文件不存在
-            response = "###ALLOW###"  # 开始文件上传标志
+            response = "ALLOW"  # 开始文件上传标志
             self.__file_put_alert(connfd, name, file_name)
         connfd.send(response.encode())
 
@@ -152,7 +153,7 @@ class ChatServer:
         :param file_name: 要下载的文件的文件名
         """
         if self.__data_manager.is_file_exist(file_name):  # 如果文件存在
-            response = "###AGREE###"
+            response = "AGREE"
         else:
             response = "$$There is no file what you want...$$"
         connfd.send(response.encode())
@@ -194,7 +195,7 @@ class ChatServer:
         :param name: 游戏步骤发送者用户名
         :param step: 游戏步骤信息
         """
-        (self.__dict_game_info[name])[1].send("STEP %s" % step)
+        (self.__dict_game_info[name])[1].send(("STEP %s" % step).encode())
 
     def __game_victory(self, name):
         """

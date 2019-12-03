@@ -18,7 +18,6 @@ class ClientUI:
         self.__window.resizable(height=False, width=False)
         self.__x0 = 30  # 游戏map X方向起始位置
         self.__y0 = 20  # 游戏map Y方向起始位置
-        self.__mark = 0  # 游戏发起者或接受者标记，发起者为1，接受者为2
 
     def run(self):
         self.__create_connect()  # 连接网络
@@ -207,7 +206,8 @@ class ClientUI:
             tkinter.messagebox.showerror(title="Request Error", message="You are in a game now")
             return  # 已在游戏中则中止后续处理
         self.__client.game_request()  # 游戏请求发送
-        self.__mark = 1  # 游戏标记变更(表明此时为发起者)
+        self.__client.mark = 1  # 游戏标记变更(表明此时为发起者)
+        self.__client.mark_adv = 2  # 对手游戏标记变更(表明对手为接受者)
         self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)  # 棋盘外框架设置
         self.__game_window.title("game view")
         self.__game_window.resizable(width=False, height=False)
@@ -227,7 +227,8 @@ class ClientUI:
         if self.__client.allow_join == False:
             tkinter.messagebox.showerror(title="Accept Error", message="The game has already been joined")
             return
-        self.__mark = 2  # 游戏标记变更(表明此时为接受者)
+        self.__client.mark = 2  # 游戏标记变更(表明此时为接受者)
+        self.__client.mark_adv = 1  # 对手游戏标记变更(表明对手为发起者)
         self.__game_window = tk.Toplevel(self.__chat_window, height=360, width=340)  # 棋盘外框架设置
         self.__game_window.title("game view")
         self.__game_window.resizable(width=False, height=False)
@@ -306,9 +307,12 @@ class ClientUI:
             return
         else:
             if self.__client.map[r][c] == 0:
-                self.__client.map[r][c] = self.__mark
+                self.__client.map[r][c] = self.__client.mark
             entry_info_row.set("")
             entry_info_col.set("")
+            self.__client.game_step_send(("%s&%s" % (str(r), str(c))))  # 将走棋步骤发送
+            if self.__client.game_obj.win(r, c):
+                tkinter.messagebox.showinfo(title="Game Over",message="You Win")
 
     """---------------------------------------游戏相关控件设置-------------------------------------------"""
 
