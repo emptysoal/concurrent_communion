@@ -22,8 +22,6 @@ class ChatClient:
         self.__lock = Lock()  # 创建锁对象
         self.game_obj = game_logic.GameLogic()  # 创建游戏对象
         self.map = self.game_obj.list  # 游戏map
-        self.r = 0  # 游戏初始行游标
-        self.c = 0  # 游戏初始列游标
         self.mark = 0  # 游戏发起者或接受者标记，发起者为1，接受者为2
         self.mark_adv = 0  # 对手标记（发起者或接受者），发起者为2，接受者为1
         self.was_in_game = False  # 是否已在游戏中的标志，False不在，True在
@@ -103,10 +101,11 @@ class ChatClient:
                 self.allow_join = False
             elif data.decode().split(" ")[0] == "STEP":  # 接收到对手的游戏步骤
                 step_info = data.decode().split(" ")[1]
-                self.r = int(step_info.split("&")[0])
-                self.c = int(step_info.split("&")[1])
-                self.map[self.r][self.c] = self.mark_adv
-                if self.game_obj.win(self.r, self.c):
+                r = int(step_info.split("&")[0])
+                c = int(step_info.split("&")[1])
+                self.map[r][c] = self.mark_adv
+                if self.game_obj.win(r, c):
+                    self.init_game()
                     tkinter.messagebox.showinfo(title="Game Over", message="You Lose")
             elif data == b"##EXIT##":
                 return
@@ -179,3 +178,13 @@ class ChatClient:
         :param step: 游戏步骤信息
         """
         self.__sockfd.send(("S %s %s" % (self.__name, step)).encode())
+
+    def init_game(self):
+        """
+            游戏相关数据初始化
+        """
+        self.map = self.game_obj.init_map_list()
+        self.mark = 0
+        self.mark_adv = 0
+        self.was_in_game = False
+        self.allow_join = False

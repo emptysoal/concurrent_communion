@@ -300,9 +300,11 @@ class ClientUI:
 
     # 根据输入的坐标填充棋子（链接坐标提交按钮）
     def __oval_join_self(self, entry_obj_row, entry_obj_col, entry_info_row, entry_info_col):
+        if self.__client.was_in_game == False:
+            return
         try:
-            r = int(entry_obj_row.get()) - 1
-            c = int(entry_obj_col.get()) - 1
+            r = int(entry_obj_row.get().strip()) - 1
+            c = int(entry_obj_col.get().strip()) - 1
         except ValueError:
             return
         else:
@@ -312,7 +314,8 @@ class ClientUI:
             entry_info_col.set("")
             self.__client.game_step_send(("%s&%s" % (str(r), str(c))))  # 将走棋步骤发送
             if self.__client.game_obj.win(r, c):
-                tkinter.messagebox.showinfo(title="Game Over",message="You Win")
+                self.__client.init_game()
+                tkinter.messagebox.showinfo(title="Game Over", message="You Win")
 
     """---------------------------------------游戏相关控件设置-------------------------------------------"""
 

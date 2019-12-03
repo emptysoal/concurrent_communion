@@ -5,10 +5,10 @@
 
 class GameLogic:
     def __init__(self):
-        self.list = self.__init_map_list()
+        self.list = self.init_map_list()
 
     @staticmethod
-    def __init_map_list():
+    def init_map_list():
         """
             初始化游戏map
         """
@@ -19,28 +19,6 @@ class GameLogic:
                 map_r.append(0)
             map.append(map_r)
         return map
-
-    def choose(self, number):
-        if number == '1':
-            return '黑子'
-        elif number == '-1':
-            return '白子'
-        else:
-            return False
-
-    def black_player(self, row, line):
-        if 0 <= row < 15 and 0 <= line < 15:
-            self.list[row][line] = 1
-            return self.list
-        else:
-            return False
-
-    def white_player(self, row, line):
-        if 0 <= row < 15 and 0 <= line < 15:
-            self.list[row][line] = -1
-            return self.list
-        else:
-            return False
 
     def win(self, row, line):
 
