@@ -5,7 +5,8 @@ import ui
 
 
 class MainClient:
-    def main(self):
+    @staticmethod
+    def main():
         client = ui.ClientUI()
         client.run()
 

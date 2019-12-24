@@ -79,6 +79,9 @@ class ChatServer:
         elif request.decode().split(" ")[0] == "B":
             name = request.decode().split(" ")[1]
             self.__game_defeat(name)  # 游戏失败处理
+        elif request.decode().split(" ")[0] == "H":
+            name = request.decode().split(" ")[1]
+            self.__game_record_refer(connfd, name)  # 游戏战绩查询处理
         else:
             pass  # 退出请求处理
 
@@ -212,6 +215,22 @@ class ChatServer:
         """
         self.__buffer.put(("GAME", name, "defeat"))
 
+    def __game_record_refer(self, connfd, name):
+        """
+            根据用户名查询游戏战绩
+        :param connfd: 对应处理游戏战绩查询者的相关信息的套接字
+        :param name: 游戏战绩查询者用户名
+        """
+        # 数据模型返回格式[['Lily', 'victory', '2019-12-05 21:08:06'], ['Lily', 'defeat', '2019-12-07 13:25:32']]
+        list_game_record = self.__data_manager.refer_game_record(name)
+        list_child = []
+        for item in list_game_record:
+            str_child = "&&".join(item)
+            list_child.append(str_child)
+        str_game_record = "&&&".join(list_child)
+        # 发送格式 "Lily&&victory&&2019-12-05 21:08:06&&&Lily&&defeat&&2019-12-07 13:25:32"
+        connfd.send(("GAMERECORD " + str_game_record).encode())
+
     @staticmethod
     def __recv_file(c):
         """
@@ -330,7 +349,6 @@ class ChatServer:
         wait_file_get_process.start()
 
         self.__select_concurrent()  # 启动IO多路复用进程，用于频繁进行数据转发
-
 
 # if __name__ == '__main__':
 #     # 用于启动服务器

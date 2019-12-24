@@ -108,8 +108,8 @@ class ClientUI:
         self.__init_chat_view()
         self.__roll_display()
         self.__msg_input_entry()
-        self.__file_configure()
-        self.__game_configure()
+        self.__file_configure()  # 聊天界面上文件控件相关设置
+        self.__game_configure()  # 聊天界面上游戏控件相关设置
 
     def __init_chat_view(self):
         self.__label_obj = []
@@ -187,19 +187,23 @@ class ClientUI:
 
     def __game_configure(self):
         # 游戏邀请发送
-        bt_game_request = tk.Button(self.__chat_window, text="request", font=("Arial", 10, "bold"), width=6,
+        bt_game_request = tk.Button(self.__chat_window, text="request", font=("Arial", 10, "bold"), width=4,
                                     activebackground="yellow", command=self.__game_request)
         bt_game_request.place(x=20, y=378)
         # 游戏邀请接受
         label_accept = tk.Label(self.__chat_window, text="proposer", font=("Arial", 11, "bold"), fg="purple")
-        label_accept.place(x=150, y=380)
+        label_accept.place(x=110, y=380)
         entry_proposer_value = tk.StringVar()
         entry_proposer = tk.Entry(self.__chat_window, width=8, textvariable=entry_proposer_value)
-        entry_proposer.place(x=225, y=380)
-        bt_game_accept = tk.Button(self.__chat_window, text="accept", font=("Arial", 10, "bold"), width=6,
+        entry_proposer.place(x=180, y=380)
+        bt_game_accept = tk.Button(self.__chat_window, text="accept", font=("Arial", 10, "bold"), width=4,
                                    activebackground="yellow",
                                    command=lambda: self.__game_accept(entry_proposer, entry_proposer_value))
-        bt_game_accept.place(x=306, y=378)
+        bt_game_accept.place(x=256, y=378)
+        # 游戏战绩查询
+        bt_game_record = tk.Button(self.__chat_window, text="record", font=("Arial", 10, "bold"), width=4,
+                                   activebackground="yellow", command=self.__game_record)
+        bt_game_record.place(x=320, y=378)
 
     # 游戏邀请按钮关联函数
     def __game_request(self):
@@ -292,8 +296,8 @@ class ClientUI:
     def __init_ovals(self, canvas):
         try:
             if self.__client.game_obj.win(self.__client.r, self.__client.c):
-                self.last_oval(canvas, self.__client.r, self.__client.c, self.__dict_color[self.__client.mark_adv])
-                self.__client.game_result_lose()    # 向服务器发送失败结果
+                self.__last_oval(canvas, self.__client.r, self.__client.c, self.__dict_color[self.__client.mark_adv])
+                self.__client.game_result_lose()  # 向服务器发送失败结果
                 self.__client.init_game()
                 tkinter.messagebox.showinfo(title="Game Over", message="You Lose")
         except:
@@ -325,14 +329,68 @@ class ClientUI:
             entry_info_col.set("")
             self.__client.game_step_send(("%s&%s" % (str(r), str(c))))  # 将走棋步骤发送
             if self.__client.game_obj.win(r, c):
-                self.last_oval(canvas, r, c, self.__dict_color[self.__client.mark])
+                self.__last_oval(canvas, r, c, self.__dict_color[self.__client.mark])
+                sleep(0.5)
                 self.__client.game_result_win()  # 向服务器发送胜利结果
                 self.__client.init_game()
                 tkinter.messagebox.showinfo(title="Game Over", message="You Win")
 
-    def last_oval(self, canvas, r, c, mark):
+    def __last_oval(self, canvas, r, c, mark):
         canvas.create_oval(self.__x0 - 7 + c * 20, self.__y0 - 7 + r * 20, self.__x0 + 7 + c * 20,
                            self.__y0 + 7 + r * 20, fill=mark)
+
+    """查询游戏战绩"""
+
+    # 链接查游戏战绩按钮
+    def __game_record(self):
+        """
+            开始进行游戏战绩相关设置
+        """
+        # 发送请求，邀请服务器查询战绩
+        self.__client.game_record_refer()
+        sleep(1)
+        # 弹出战绩显示界面
+        self.__generate_record()
+
+    def __generate_record(self):
+        """
+            将战绩信息存储到各自label控件中
+        """
+        record_view = tk.Toplevel(self.__chat_window, width=400, height=300)
+        record_view.title("Game Record")
+        record_view.resizable(width=False, height=False)
+        i = 1
+        list_all_label = []
+        for item in self.__client.list_game_record:
+            list_row_label = [tk.Label(record_view, text=str(i))]
+            for element in item:
+                label = tk.Label(record_view, text=element)
+                list_row_label.append(label)
+            list_all_label.append(list_row_label)
+            i += 1
+        self.__create_head(record_view)
+        self.__show_record(list_all_label)
+
+    @staticmethod
+    def __create_head(record_view):
+        """
+            生成表头
+        :param record_view: 战绩表所在视图界面
+        """
+        tk.Label(record_view, text="No.", font=("Arial", 12, "bold"), fg="blue").place(x=24, y=10)
+        tk.Label(record_view, text="user", font=("Arial", 12, "bold"), fg="blue").place(x=93, y=10)
+        tk.Label(record_view, text="result", font=("Arial", 12, "bold"), fg="blue").place(x=159, y=10)
+        tk.Label(record_view, text="end time", font=("Arial", 12, "bold"), fg="blue").place(x=260, y=10)
+
+    @staticmethod
+    def __show_record(list_all_label):
+        """
+            将战绩所在控件显示在界面上
+        :param list_all_label: 全部label所在列表
+        """
+        for c in range(len(list_all_label)):
+            for r in range(len(list_all_label[c])):
+                list_all_label[c][r].place(x=30 + r * 65, y=40 + c * 30)
 
     """---------------------------------------游戏相关控件设置-------------------------------------------"""
 

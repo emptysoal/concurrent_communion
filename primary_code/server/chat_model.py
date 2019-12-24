@@ -117,13 +117,27 @@ class DataManager:
         """
         sql = "insert into game_record(name,result) values(%s,%s);"
         try:
-            self.__cur.execute(sql,[name,result])
+            self.__cur.execute(sql, [name, result])
             self.__db.commit()
         except Exception as e:
             self.__db.rollback()
             return False
         else:
             return True
+
+    def refer_game_record(self, name):
+        """
+            根据用户名查询游戏战绩
+        :param name: 查询战绩者用户名
+        :return: 列表，包含战绩信息
+        """
+        sql = "select name,result,start_time from game_record where name = '%s' limit 10;" % name
+        self.__cur.execute(sql)
+        re = list(self.__cur.fetchall())
+        list_record = []
+        for item in re:
+            list_record.append((item[0], item[1], "%s" % item[2]))
+        return list_record
 
 
 if __name__ == '__main__':

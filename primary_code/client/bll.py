@@ -27,7 +27,8 @@ class ChatClient:
         self.mark = 0  # 游戏发起者或接受者标记，发起者为1，接受者为2
         self.mark_adv = 0  # 对手标记（发起者或接受者），发起者为2，接受者为1
         self.was_in_game = False  # 是否已在游戏中的标志，False不在，True在
-        self.allow_join = False   # 是否允许加入游戏标志，False不允许，True允许
+        self.allow_join = False  # 是否允许加入游戏标志，False不允许，True允许
+        self.list_game_record = []  # 存放游戏战绩
 
     def connect_server(self):
         """
@@ -109,6 +110,12 @@ class ChatClient:
                 # if self.game_obj.win(r, c):
                 #     self.init_game()
                 #     tkinter.messagebox.showinfo(title="Game Over", message="You Lose")
+            elif data.decode().split(" ")[0] == "GAMERECORD":
+                str_game_record = data.decode().split(" ", 1)[1]
+                list_game_record = []
+                for ele in str_game_record.split("&&&"):
+                    list_game_record.append(ele.split("&&"))
+                self.list_game_record = list_game_record
             elif data == b"##EXIT##":
                 return
             else:
@@ -204,3 +211,9 @@ class ChatClient:
         self.mark_adv = 0
         self.was_in_game = False
         self.allow_join = False
+
+    def game_record_refer(self):
+        """
+            游戏战绩查询请求发送
+        """
+        self.__sockfd.send(("H %s" % self.__name).encode())

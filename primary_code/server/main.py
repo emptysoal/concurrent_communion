@@ -6,7 +6,8 @@ import configure_server as config
 
 
 class MainServer:
-    def main(self):
+    @staticmethod
+    def main():
         host = config.HOST
         port = config.PORT
         server = chat_server.ChatServer(host, port)
